@@ -1,28 +1,27 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ExplicitForAll        #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE ExplicitForAll #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TypeFamilies          #-}
 
 module Foundation where
 
-import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Text.Hamlet          (hamletFile)
-import Text.Jasmine         (minifym)
+import           Database.Persist.Sql (ConnectionPool, runSqlPool)
+import           Import.NoFoundation
+import           Text.Hamlet          (hamletFile)
+import           Text.Jasmine         (minifym)
 
 -- Used only when in "auth-dummy-login" setting is enabled.
-import Yesod.Auth.Dummy
+import           Yesod.Auth.Dummy
 
-import Yesod.Auth.OpenId    (authOpenId, IdentifierType (Claimed))
-import Yesod.Default.Util   (addStaticContentExternal)
-import Yesod.Core.Types     (Logger)
-import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
-import qualified Data.Text.Encoding as TE
+import qualified Data.Text.Encoding   as TE
+import           Yesod.Auth.OpenId    (IdentifierType (Claimed), authOpenId)
+import           Yesod.Core.Types     (Logger)
+import qualified Yesod.Core.Unsafe    as Unsafe
+import           Yesod.Default.Util   (addStaticContentExternal)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -37,8 +36,8 @@ data App = App
     }
 
 data MenuItem = MenuItem
-    { menuItemLabel :: Text
-    , menuItemRoute :: Route App
+    { menuItemLabel          :: Text
+    , menuItemRoute          :: Route App
     , menuItemAccessCallback :: Bool
     }
 
@@ -74,7 +73,7 @@ instance Yesod App where
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot = ApprootRequest $ \app req ->
         case appRoot $ appSettings app of
-            Nothing -> getApprootText guessApproot app req
+            Nothing   -> getApprootText guessApproot app req
             Just root -> root
 
     -- Store session data on the client in encrypted cookies,
@@ -147,14 +146,15 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     -- Routes not requiring authentication.
-    isAuthorized (AuthR _) _ = return Authorized
-    isAuthorized CommentR _ = return Authorized
-    isAuthorized HomeR _ = return Authorized
-    isAuthorized FaviconR _ = return Authorized
-    isAuthorized RobotsR _ = return Authorized
+    isAuthorized (AuthR _) _   = return Authorized
+    isAuthorized CommentR _    = return Authorized
+    isAuthorized HomeR _       = return Authorized
+    isAuthorized HelloR _      = return Authorized
+    isAuthorized FaviconR _    = return Authorized
+    isAuthorized RobotsR _     = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
 
-    isAuthorized ProfileR _ = isAuthenticated
+    isAuthorized ProfileR _    = isAuthenticated
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -186,10 +186,10 @@ instance Yesod App where
 
 -- Define breadcrumbs.
 instance YesodBreadcrumbs App where
-  breadcrumb HomeR = return ("Home", Nothing)
+  breadcrumb HomeR     = return ("Home", Nothing)
   breadcrumb (AuthR _) = return ("Login", Just HomeR)
-  breadcrumb ProfileR = return ("Profile", Just HomeR)
-  breadcrumb  _ = return ("home", Nothing)
+  breadcrumb ProfileR  = return ("Profile", Just HomeR)
+  breadcrumb  _        = return ("home", Nothing)
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -232,7 +232,7 @@ isAuthenticated = do
     muid <- maybeAuthId
     return $ case muid of
         Nothing -> Unauthorized "You must login to access this page"
-        Just _ -> Authorized
+        Just _  -> Authorized
 
 instance YesodAuthPersist App
 
