@@ -9,6 +9,7 @@ import           Import
 import           Text.Julius           (RawJS (..))
 import           Yesod.Form.Bootstrap3 (BootstrapFormLayout (..),
                                         renderBootstrap3)
+-- |This is the hello handler
 getHelloR :: Handler Html
 getHelloR =
   defaultLayout $ do
